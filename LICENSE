@@ -1,0 +1,50 @@
+VIDYASETU SOURCE-AVAILABLE NON-COMMERCIAL LICENSE
+Version 1.0 — 2026
+
+Copyright (c) 2026 [Your Full Name / VidyaSetu Team]
+All rights reserved.
+
+1. DEFINITIONS
+"Software" refers to the VidyaSetu source code, backend services, diagnostic
+engine logic, prompt architectures, synchronization pipelines, user interfaces,
+and accompanying documentation provided in this repository.
+
+"Commercial Use" means any use intended for or directed toward commercial
+advantage, monetary compensation, paid subscriptions, institutional licensing,
+or integration into a commercial product or service.
+
+2. PERMITTED USE (NON-COMMERCIAL & EVALUATION ONLY)
+Subject to the terms of this License, the Copyright Holder grants you a
+limited, non-exclusive, revocable, non-transferable license to:
+  (a) View and inspect the Software for personal learning, technical review,
+      or academic/portfolio evaluation.
+  (b) Run the Software locally solely for non-commercial testing, personal
+      study, or non-profit educational demonstration.
+
+3. RESTRICTIONS
+Without prior written permission or a separate commercial license from the
+Copyright Holder, you may NOT:
+  (a) Use the Software, in whole or in part, for any Commercial Use.
+  (b) Redistribute, sublicense, sell, rent, lease, or host the Software as a
+      public or paid service (SaaS/API) for third parties.
+  (c) Create competing derivative works, or extract core diagnostic workflows,
+      algorithms, or prompt pipelines for use in another software product.
+  (d) Remove or alter any copyright notices, trademarks, or attribution
+      headers contained within the Software.
+
+4. THIRD-PARTY COMPONENTS & CONTENT
+The Software may rely on third-party libraries, machine learning models, APIs,
+or curriculum reference materials that are governed by their own separate
+licenses. Nothing in this License grants rights to third-party components
+beyond what their respective licenses permit.
+
+5. COMMERCIAL LICENSING & PERMISSIONS
+To request commercial rights, institutional deployment, or partnership
+permissions for VidyaSetu, contact: [your-email@example.com].
+
+6. DISCLAIMER OF WARRANTY & LIMITATION OF LIABILITY
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING
+FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.

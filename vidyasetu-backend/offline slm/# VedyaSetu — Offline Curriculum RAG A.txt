@@ -1,0 +1,369 @@
+## VedyaSetu — Offline Curriculum RAG Assistant for Odisha State Board (Classes 9, 10 & 12)
+
+## 1. Project Overview
+
+**VedyaSetu** is a 100% offline-capable, bilingual (Odia and English) Retrieval-Augmented Generation (RAG) system designed for Odisha State Board (BSE & CHSE) students in **Classes 9, 10, and 12**.
+
+The system is strictly divided into two decoupled phases:
+1. **One-Time Ingestion & Knowledge-Base Construction (`run_pipeline.py`):** Reads curated UTF-8 plain-text (`.txt`) textbook chapters, validates metadata and prerequisite concept links, splits sections into context-preserving chunks, generates 768-dimensional vectors using `intfloat/multilingual-e5-base`, and indexes identical canonical records into **ChromaDB** (semantic search) and **SQLite FTS5** (BM25 keyword search).
+2. **Offline Runtime Question Answering & Question Generation (`rag_runtime.py`):** Performs read-only hybrid retrieval combining ChromaDB cosine similarity and SQLite FTS5 keyword search via Reciprocal Rank Fusion (RRF), enforces strict grade/subject/chapter/language metadata filters, and uses a local **Ollama** model (`qwen2.5:3b`) to generate cited explanations or practice questions (MCQs and descriptive questions).
+
+> **Important Note on PDF Extraction:** PDF parsing (`1_extract_pdfs.py`), Optical Character Recognition (OCR), and vision-model calls are **not** part of the normal ingestion pipeline. Legacy Odia PDF fonts (such as Akruti or ShreeLipi) frequently introduce encoding corruption; therefore, VidyaSetu ingests verified UTF-8 plain-text (`.txt`) textbook files directly.
+
+---
+
+## 2. System Architecture
+
+| Phase | Stage / Module | Role & Responsibilities | Writes to DB? |
+| :--- | :--- | :--- | :--- |
+| **Phase 1: One-Time Ingestion** | `import_textbook.py` | Discovers `.txt` chapters, normalizes Unicode NFC (preserving Odia script and ZWNJ/ZWJ), strips end-of-chapter exercises, and outputs `data/processed/*.json`. | No |
+| **Phase 1: One-Time Ingestion** | `2_validate_links.py` | Validates record schema, required metadata, stable IDs, Unicode integrity (rejecting mojibake/U+FFFD), and prerequisite concept graphs. Outputs approved records to `data/extracted_json/*.json`. | No |
+| **Phase 1: One-Time Ingestion** | `embeddings.py` | Process-wide singleton managing `intfloat/multilingual-e5-base` (768-dim, L2-normalized). Applies `"passage: "` to documents and `"query: "` to student questions. | No |
+| **Phase 1: One-Time Ingestion** | `3_build_databases.py` | Splits approved sections into context-preserving chunks (keeping formulas and definitions attached to context), computes SHA-256 hashes to skip unchanged chunks, backs up existing databases, and populates ChromaDB + SQLite FTS5. | **Yes** (Staging & Atomic Swap) |
+| **Phase 1: Orchestrator** | `run_pipeline.py` | Executes the complete 10-stage one-time ingestion workflow end-to-end with pre-build backups, consistency checks, and a read-only retrieval probe. | **Yes** (via Stage 3) |
+| **Phase 2: Offline Runtime** | `rag_runtime.py` | Read-only hybrid retriever (ChromaDB + SQLite FTS5 with RRF ranking) and grounded local Ollama generator for **Explanation Mode** and **Question-Generation Mode**. Never rebuilds or mutates the knowledge base. | **Never** |
+| **Verification & Audit** | `4_test_rag.py` | Runs automated Category A–E unit/integration tests and evaluates Recall@k, grounding accuracy, and retrieval latency against `data/evaluation/test_questions.json`. | No (Uses temp dirs for tests) |
+
+---
+
+## 3. Supported Classes, Subjects, and Languages
+
+* **Supported Classes (`class_level`):** `9`, `10`, `12` (enforced by schema and runtime filters; lower classes cannot retrieve higher-class prerequisites).
+* **Supported Languages (`language`):**
+  * `or` — Odia (`ଓଡ଼ିଆ`, Unicode block `U+0B00`–`U+0B7F`)
+  * `en` — English
+  * `bilingual` — Mixed Odia and English technical prose
+* **Supported Subjects (`subject`):** Any BSE/CHSE Odisha subject supplied in plain text (e.g., `Geography`, `Physics`, `Chemistry`, `Mathematics`, `Biology`, `Vigyan`).
+
+---
+
+## 4. Plain-Text Chapter Input Format
+
+Each textbook chapter in `data/source_text/` must be a UTF-8 encoded `.txt` file. Metadata can be provided either via a **YAML-style front-matter block** at the top of the `.txt` file OR via a companion **`<filename>.meta.json`** sidecar file in the same folder.
+
+### Option A: Front-Matter Header Inside the `.txt` File
+```text
+---
+CLASS: 10
+SUBJECT: Geography
+CHAPTER_ID: ch03
+CHAPTER_NUM: 3
+CHAPTER_NAME: Water Resources
+LANGUAGE: or
+SOURCE_NAME: BSE Odisha Class 10 Geography
+PAGE_NUMBERS: 25-38
+---
+
+## ୩.୧ ଜଳ ସଂରକ୍ଷଣ ଓ ବହୁମୁଖୀ ନଦୀବନ୍ଧ ଯୋଜନା (Water Conservation and Multipurpose Projects)
+ଖାଦ୍ୟ ସୁରକ୍ଷା ସୁନିଶ୍ଚିତ କରିବା ଏବଂ ପରିସଂସ୍ଥାକୁ ରକ୍ଷା କରିବା ପାଇଁ ଜଳ ସଂରକ୍ଷଣ ଅତ୍ୟନ୍ତ ଜରୁରୀ।
+ମହାନଦୀ ଅବବାହିକାରେ ନିର୍ମିତ ହୀରାକୁଦ ନଦୀବନ୍ଧ ଯୋଜନା ଜଳସେଚନ ଓ ବନ୍ୟା ନିୟନ୍ତ୍ରଣ ପାଇଁ ବ୍ୟବହୃତ ହୁଏ।
+```
+
+### Option B: Sidecar `.meta.json` File (e.g., `10th Water resources.meta.json`)
+```json
+{
+  "class_level": 10,
+  "subject": "Geography",
+  "chapter_id": "ch03",
+  "chapter_num": 3,
+  "chapter_name": "Water Resources",
+  "language": "or",
+  "source_name": "BSE Odisha Class 10 Geography",
+  "page_numbers": "25-38"
+}
+```
+
+### Section Headings inside `.txt` Files
+Use Markdown headings (`## Section Title`), bracketed tags (`[SECTION: Section Title]`), or numbered Odia/English headings (`୩.୧ ...` or `3.1 ...`) to mark section boundaries. End-of-chapter exercise blocks (such as `## ଅଭ୍ୟାସ (Exercises)` or `## Questions`) are automatically excluded so ungrounded questions do not pollute the knowledge base.
+
+---
+
+## 5. Recommended Folder Structure
+
+```text
+Nidana_RAG/
+├── .env.example                 # Documented environment configuration template
+├── .env                         # Local environment configuration (copied from .env.example)
+├── requirements.txt             # Audited Python dependencies
+├── README.md                    # Project documentation
+├── import_textbook.py           # Stage 1: Plain-text chapter ingestion & normalization
+├── 2_validate_links.py          # Stage 2: Structural, Unicode & prerequisite-graph validator
+├── embeddings.py                # Singleton E5 embedding service (intfloat/multilingual-e5-base)
+├── 3_build_databases.py         # Stage 3: Context-preserving chunker & dual-DB builder
+├── run_pipeline.py              # One-time 10-stage ingestion orchestrator
+├── rag_runtime.py               # Offline hybrid RAG runtime (Explanation & Question modes)
+├── 4_test_rag.py                # Category A-E test suite & Recall@k evaluation harness
+├── data/
+│   ├── source_text/             # Input UTF-8 .txt textbook chapters & optional .meta.json files
+│   ├── processed/               # Intermediate normalized JSON records per chapter
+│   ├── extracted_json/          # Approved JSON records validated by 2_validate_links.py
+│   └── evaluation/              # Isolated evaluation benchmarks & generated question banks
+│       ├── test_questions.json
+│       └── latest_eval_report.json
+└── db/
+    ├── chroma_odisha_kb/        # Persistent ChromaDB HNSW cosine vector store
+    ├── offline_curriculum.db    # SQLite FTS5 keyword index & local mastery tables
+    └── backups/                 # Timestamped automatic database backups
+```
+
+---
+
+## 6. Required Metadata
+
+Every imported section record and generated chunk preserves the following metadata fields:
+
+| Field Name | Type | Example | Description |
+| :--- | :--- | :--- | :--- |
+| `class_level` | `int` | `10` | Must be `9`, `10`, or `12`. |
+| `subject` | `str` | `"Geography"` | Curriculum subject name. |
+| `chapter_id` | `str` | `"ch03"` | Normalized chapter identifier (`ch01`, `ch03`, etc.). |
+| `chapter_num` | `int` | `3` | Positive integer chapter number. |
+| `chapter_name` | `str` | `"Water Resources"` | Human-readable chapter title. |
+| `language` | `str` | `"or"` | `"or"` (Odia), `"en"` (English), or `"bilingual"`. |
+| `source_name` | `str` | `"BSE Odisha Class 10 Geography"` | Official textbook provenance title. |
+| `page_numbers` | `str` | `"25-38"` | Source page range (when available). |
+| `concept_tag` | `str` | `"ch03_s001_water_resources"` | Lowercase slug identifying the section concept. |
+| `prerequisite_concept` | `str` | `"none"` | Concept tag of required prior knowledge (or `"none"`). |
+| `parent_id` | `str` | `"c10_geography_ch03_s001"` | Stable parent section ID. |
+| `chunk_id` | `str` | `"c10_geography_ch03_s001_c001"` | Stable canonical chunk ID shared across ChromaDB & SQLite. |
+
+---
+
+## 7. Installation Instructions
+
+Open **Windows Command Prompt (`cmd.exe`)** in the `VedyaSetu_RAG` directory:
+
+```cmd
+:: 1. Create and activate a Python virtual environment (Python 3.10 - 3.13)
+python -m venv .venv
+.venv\Scripts\activate
+
+:: 2. Install the audited dependencies
+pip install -r requirements.txt
+
+:: 3. Copy the environment configuration template
+copy .env.example .env
+```
+
+---
+
+## 8. Local Model Prerequisites
+
+VedyaSetu requires two local models cached on your machine before operating offline:
+
+1. **Embedding Model (`intfloat/multilingual-e5-base`):**
+   * Loaded automatically via `sentence-transformers` in `embeddings.py`.
+   * On the first run with internet access, it downloads once to your local Hugging Face cache (`~/.cache/huggingface/hub/`). All subsequent runs load directly from disk (`local_files_only=True`).
+   * Verify it is cached and ready:
+     ```cmd
+     python embeddings.py
+     ```
+
+2. **Local LLM via Ollama (`qwen2.5:3b`):**
+   * Install [Ollama](https://ollama.com/) and pull the configured model once:
+     ```cmd
+     ollama pull qwen2.5:3b
+     ```
+   * Ensure the local Ollama server is running on `http://localhost:11434`:
+     ```cmd
+     ollama serve
+     ```
+
+---
+
+## 9. How to Prepare Textbook Text Files
+
+1. Save each textbook chapter as a UTF-8 `.txt` file (without BOM) inside `data/source_text/`.
+2. Add either the `--- ... ---` front-matter block at the top of the `.txt` file or a `<filename>.meta.json` sidecar file with `class_level`, `subject`, `chapter_id`, `chapter_num`, `chapter_name`, `language`, and `source_name`.
+3. Keep mathematical formulas (`Formula: F = m × a`, `V = I × R`) and definitions (`ସଂଜ୍ଞା:`, `Definition:`) immediately following their introductory sentence so the chunker keeps them fused together.
+4. Ensure Odia text uses standard Unicode characters (`U+0B00`–`U+0B7F`) rather than legacy ASCII font encodings.
+
+---
+
+## 10. How to Run the One-Time Ingestion Pipeline
+
+Always use `run_pipeline.py` to build or update the knowledge base from plain-text chapters.
+
+### Step 1: Dry-Run Simulation (Validates & Chunks Without Modifying Databases)
+```cmd
+python run_pipeline.py --input data/source_text --dry-run
+```
+
+### Step 2: Full Production Build
+```cmd
+python run_pipeline.py --input data/source_text
+```
+
+### Additional Pipeline Options
+```cmd
+:: Custom chunk size and overlap (in words)
+python run_pipeline.py --input data/source_text --chunk-size 180 --chunk-overlap 30
+
+:: Force a full re-embedding and database rebuild (backs up existing DBs first)
+python run_pipeline.py --input data/source_text --force-rebuild
+```
+
+You can also run individual stages standalone when debugging:
+```cmd
+python import_textbook.py --input data/source_text
+python 2_validate_links.py
+python 3_build_databases.py
+```
+
+---
+
+## 11. How to Verify the Generated Databases
+
+After running the pipeline, verify that ChromaDB and SQLite FTS5 have identical chunk counts, matching IDs, and valid retrieval behavior:
+
+```cmd
+:: Run the Stage 4 evaluation benchmark & database consistency audit
+python 4_test_rag.py --eval-only
+```
+
+This checks:
+* Exact record count parity between `db/chroma_odisha_kb/` and `db/offline_curriculum.db`.
+* 1:1 matching `chunk_id` and `content_hash` values across both databases.
+* `Recall@5` across Odia, English cross-lingual, paraphrased, and out-of-scope test queries.
+
+---
+
+## 12. How to Ask Questions Using the Runtime (Explanation Mode)
+
+During student queries, **never** run `run_pipeline.py` or `3_build_databases.py`. Use `rag_runtime.py` in `explain` mode:
+
+### CLI Usage
+```cmd
+:: Ask a question in English or Odia for Class 10 Geography
+python rag_runtime.py --mode explain --question "Why is water conservation important and how do multipurpose river projects work?" --class-level 10 --subject Geography
+
+:: Filter by specific chapter and Odia language
+python rag_runtime.py --mode explain --question "ବହୁମୁଖୀ ନଦୀବନ୍ଧ ଯୋଜନା କ'ଣ?" --class-level 10 --subject Geography --chapter ch03 --language or
+```
+
+### Python API Usage
+```python
+from rag_runtime import answer_question
+
+response = answer_question(
+    question="ଜଳ ସଂରକ୍ଷଣ କାହିଁକି ଜରୁରୀ?",
+    class_level=10,
+    subject="Geography",
+    chapter="ch03",
+    language="or",
+)
+
+print(response["formatted_output"])
+```
+
+The output explicitly separates:
+1. **`=== 1. RETRIEVED TEXTBOOK SOURCE PASSAGES (VERBATIM) ===`** — Exact textbook chunks, citations, and hybrid retrieval scores.
+2. **`=== 2. GENERATED EXPLANATION [LLM Status: OK] ===`** — Grounded explanation citing `[1]`, `[2]`, etc.
+
+---
+
+## 13. How to Generate Practice Questions (Question-Generation Mode)
+
+Use `--mode questions` in `rag_runtime.py` to generate textbook-grounded Multiple-Choice Questions (MCQs) and Descriptive Questions. Generated questions are **never** inserted into ChromaDB or SQLite FTS5; you can optionally save them to a separate JSON file under `data/evaluation/`.
+
+### CLI Usage
+```cmd
+python rag_runtime.py --mode questions --question "Rainwater harvesting and Hirakud Dam" --class-level 10 --subject Geography --save-questions data/evaluation/question_bank.json
+```
+
+### Python API Usage
+```python
+from pathlib import Path
+from rag_runtime import generate_practice_questions
+
+result = generate_practice_questions(
+    topic_or_query="Hirakud Dam and multipurpose river projects",
+    class_level=10,
+    subject="Geography",
+    chapter="ch03",
+    num_mcqs=3,
+    num_descriptive=2,
+    save_to_question_bank=Path("data/evaluation/question_bank.json"),
+)
+
+print(result["formatted_output"])
+```
+
+---
+
+## 14. How to Run Tests
+
+Every core module includes built-in automated unit tests runnable completely offline:
+
+```cmd
+:: Run the full Category A-E test suite + Recall@5 benchmark
+python 4_test_rag.py
+
+:: Run only Category A-E unit tests
+python 4_test_rag.py --unit-only
+
+:: Run individual module unit test suites
+python embeddings.py --run-tests
+python 2_validate_links.py --run-tests
+python 3_build_databases.py --run-tests
+python rag_runtime.py --run-tests
+python run_pipeline.py --run-tests
+```
+
+---
+
+## 15. How to Add or Update a Chapter
+
+1. **Add a new chapter:** Place the new `.txt` file (and optional `.meta.json` sidecar) inside `data/source_text/`.
+2. **Update an existing chapter:** Edit the `.txt` file in `data/source_text/`.
+3. **Run the pipeline:**
+   ```cmd
+   python run_pipeline.py --input data/source_text
+   ```
+   * **Incremental Optimization:** `3_build_databases.py` computes deterministic SHA-256 hashes (`content_hash`) for every chunk. Unchanged chunks are automatically skipped (`Embeddings Generated: 0` for unchanged chunks), modified chunks are re-embedded and updated in-place, and deleted chunks are removed from both ChromaDB and SQLite FTS5.
+
+---
+
+## 16. How to Back Up the Databases
+
+### Automatic Backups
+Every time `3_build_databases.py` or `run_pipeline.py` modifies an existing database, it automatically creates a timestamped snapshot inside:
+```text
+db/backups/backup_YYYYMMDD_HHMMSS_mmm/
+├── chroma_odisha_kb/
+└── offline_curriculum.db
+```
+If any error occurs during embedding, indexing, or post-build verification, the builder automatically rolls back both ChromaDB and SQLite FTS5 to this backup snapshot.
+
+### Manual Backup & Restore in Windows `cmd`
+```cmd
+:: Manual Backup
+xcopy /E /I /Y db\chroma_odisha_kb db\backups\manual_backup\chroma_odisha_kb
+copy /Y db\offline_curriculum.db db\backups\manual_backup\offline_curriculum.db
+
+:: Manual Restore
+xcopy /E /I /Y db\backups\manual_backup\chroma_odisha_kb db\chroma_odisha_kb
+copy /Y db\backups\manual_backup\offline_curriculum.db db\offline_curriculum.db
+```
+
+---
+
+## 17. Common Errors and Their Solutions
+
+| Symptom / Error Message | Cause | Solution |
+| :--- | :--- | :--- |
+| **`MetadataValidationError: Missing required metadata`** | A `.txt` file in `data/source_text/` lacks both a `--- ... ---` front-matter header and a `<filename>.meta.json` sidecar file. | Add the front-matter block at the top of the `.txt` file or create its `.meta.json` sidecar. |
+| **`Detected Unicode replacement character (U+FFFD)` or `mojibake`** | Source `.txt` file was saved in legacy ANSI/Latin-1 encoding or copied from a corrupt non-Unicode PDF font. | Re-save the file in UTF-8 encoding and verify Odia text renders cleanly in Notepad. |
+| **`Metadata declares language='or', but text contains zero Odia Unicode characters`** | The `.meta.json` specifies `"language": "or"` on an English-only file (or vice versa). | Set `"language": "en"` for English chapters or `"language": "or"` for Odia chapters. |
+| **`[LLM Status: UNAVAILABLE] Local Ollama service is unreachable`** | The local Ollama background service is not running on port `11434`, or `qwen2.5:3b` is not pulled. | Run `ollama serve` in a terminal and confirm `ollama list` shows `qwen2.5:3b`. Note: Verbatim retrieved passages are still returned even when Ollama is offline. |
+| **Command Prompt appears frozen during embedding** | Clicking inside Windows `cmd.exe` with QuickEdit enabled pauses terminal stdout. | Click inside the Command Prompt window and press **Enter** (or `Esc`) to resume execution. |
+| **`ModelConfigurationError: Configured model does not match`** | `EMBEDDING_MODEL_NAME` in `.env` was changed away from `intfloat/multilingual-e5-base`. | Keep `EMBEDDING_MODEL_NAME=intfloat/multilingual-e5-base` in `.env` to preserve 768-dim vector compatibility. |
+
+---
+
+## 18. Offline Operation Limitations
+
+1. **Initial Model Caching Requires One-Time Setup:** Both `intfloat/multilingual-e5-base` and the Ollama model (`qwen2.5:3b`) must be downloaded once before disconnecting from the internet. After caching, set `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1` in `.env` for strict air-gapped operation.
+2. **Strict Textbook Grounding Boundary:** VeduSetu will **not** answer general-knowledge questions outside the ingested textbook corpus. If no chunks pass the metadata filter and relevance threshold (`RAG_MIN_SEMANTIC_SIMILARITY=0.76`), the runtime returns `skipped_insufficient_context` rather than hallucinating unsupported facts.
+3. **CPU Latency Considerations:** On a standard CPU without a dedicated GPU, hybrid retrieval (`ChromaDB` + `SQLite FTS5`) takes **~60–110 ms** per query, while local LLM text generation via Ollama (`qwen2.5:3b`) typically takes **3–12 seconds** depending on response length and Odia token density.
+4. **Educator Review Requirement:** Passing automated retrieval (`Recall@k`) and lexical grounding checks confirms software pipeline integrity; however, LLM-generated practice questions and diagnostic prompts should always be reviewed by qualified Odisha State Board teachers before classroom assessment use.

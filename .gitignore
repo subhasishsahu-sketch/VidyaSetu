@@ -1,0 +1,31 @@
+# Secrets
+.env
+*.env
+
+# Python / FastAPI backend
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Flutter / Dart mobile
+**/build/
+**/.dart_tool/
+**/.packages
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/android/.gradle/
+**/android/local.properties
+**/ios/Pods/
+
+# Large AI model weights (GitHub rejects files > 100 MB)
+*.gguf
+*.onnx
+*.bin
+*.pt
+*.safetensors
+
+# OS clutter
+.DS_Store
+Thumbs.db

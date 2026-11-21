@@ -1,5 +1,5 @@
 ﻿import 'dart:io';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:llama_cpp_dart/llama_cpp_dart.dart';
 import 'package:path/path.dart' as p;
@@ -240,7 +240,7 @@ Provide a clear grounded explanation citing [1] in under 90 words:
       debugPrint('SLM_ERROR: $e\n$st');
       setState(() => _status = 'Error: $e');
     } finally {
-      db?.dispose();
+      db?.close();
       await engine?.dispose();
       setState(() => _running = false);
     }

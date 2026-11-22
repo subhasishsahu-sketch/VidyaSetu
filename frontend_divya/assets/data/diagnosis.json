@@ -1,0 +1,14 @@
+{
+  "HIST_CH2_Q03": {
+    "question_id": "HIST_CH2_Q03",
+    "diagnosis_title": "Careless Terminology Confusion",
+    "diagnosis_title_or": "ଅସାବଧାନତା ଜନିତ ଶବ୍ଦାବଳୀ ଭ୍ରାନ୍ତି",
+    "certainty_percent": 94,
+    "source_engine": "Causal Error Mapping • VidyaSetu Cognitive Engine",
+    "causal_why_title": "କାହିଁକି ଏହି ଭୁଲ୍ ହେଲା? (Causal Why)",
+    "causal_why_en": "You remembered the timeline (1951) accurately, but confused the official statutory name State Planning Board with the colloquial translation Odisha Planning Commission.\n\nIn the BSE Odisha Class 10 textbook (Chapter 2, Page 43), the apex state organ was formally instituted as the \"State Planning Board\" (ରାଜ୍ୟ ଯୋଜନା ବୋର୍ଡ) to bridge local targets with Central Five-Year allocations.",
+    "causal_why_or": "ଆପଣ ସମୟରେଖା (୧୯୫୧) ସଠିକ୍ ଭାବେ ମନେ ରଖିଥିଲେ, କିନ୍ତୁ ଆନୁଷ୍ଠାନିକ ବୈଧାନିକ ନାମ 'ରାଜ୍ୟ ଯୋଜନା ବୋର୍ଡ' ଏବଂ କଥିତ ଅନୁବାଦ 'ଓଡ଼ିଶା ଯୋଜନା ଆୟୋଗ' ମଧ୍ୟରେ ଦ୍ୱନ୍ଦ୍ୱରେ ପଡ଼ିଲେ।\n\nBSE ଓଡ଼ିଶା ଦଶମ ଶ୍ରେଣୀ ପାଠ୍ୟପୁସ୍ତକ (ଅଧ୍ୟାୟ ୨, ପୃଷ୍ଠା ୪୩) ଅନୁଯାୟୀ, କେନ୍ଦ୍ରୀୟ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା ସହିତ ସମନ୍ୱୟ ରଖିବା ପାଇଁ ରାଜ୍ୟର ଶୀର୍ଷ ସଂସ୍ଥା ଭାବେ \"ରାଜ୍ୟ ଯୋଜନା ବୋର୍ଡ\" ଗଠନ କରାଯାଇଥିଲା।",
+    "citation": "BSE Ch 2: Independent Odisha Eco... Pg. 43 § 2.4",
+    "db_storage_badge": "Diagnostics indexed locally in SQLite DB (32KB cached) • Auto-saved"
+  }
+}

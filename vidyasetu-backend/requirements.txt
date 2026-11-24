@@ -7,3 +7,5 @@ pytest>=8.0.0
 pytest-asyncio>=0.24.0
 langgraph>=0.2.0
 google-genai>=1.0.0
+sarvamai>=0.1.49
+python-multipart>=0.0.34

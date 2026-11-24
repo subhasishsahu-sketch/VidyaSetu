@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = "gemini-2.5-flash"
     CORS_ORIGINS: List[str] = ["*"]
 
+    # Sarvam AI Voice Integration
+    SARVAM_API_KEY: str = ""
+    SARVAM_TTS_MODEL: str = "bulbul:v4-flash"
+    SARVAM_TTS_SPEAKER: str = "simran_en_customer"
+    SARVAM_STT_MODEL: str = "saaras:v4"
+
     HOST: str = "0.0.0.0"
     PORT: int = 8000
 

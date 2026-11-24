@@ -8,6 +8,7 @@ from app.api.routes.language import router as language_router
 from app.api.routes.questions import router as questions_router
 from app.api.routes.students import router as students_router
 from app.api.routes.sync import router as sync_router
+from app.api.routes.voice import router as voice_router
 from app.core.config import settings
 from app.database.mongodb import (
     connect_to_mongo,
@@ -77,5 +78,6 @@ app.include_router(questions_router, prefix=settings.API_V1_PREFIX)
 app.include_router(diagnostics_router, prefix=settings.API_V1_PREFIX)
 app.include_router(language_router, prefix=settings.API_V1_PREFIX)
 app.include_router(sync_router, prefix=settings.API_V1_PREFIX)
+app.include_router(voice_router, prefix=settings.API_V1_PREFIX)
 
 

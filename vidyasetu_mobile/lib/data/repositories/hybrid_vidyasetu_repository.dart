@@ -8,6 +8,7 @@ import '../models/diagnostic_model.dart';
 import '../models/language_model.dart';
 import '../models/offline_pack_model.dart';
 import '../models/sync_batch_model.dart';
+import '../models/voice_model.dart';
 import '../../core/offline/local_database.dart';
 import 'vidyasetu_repository.dart';
 import 'cloud_vidyasetu_repository.dart';
@@ -263,5 +264,47 @@ class HybridVidyaSetuRepository implements VidyaSetuRepository {
     localDb.removeSyncedEvents(acknowledgedIds);
 
     return res;
+  }
+
+  @override
+  Future<TtsResponse> synthesizeSpeech(TtsRequest request) async {
+    if (await isOnline()) {
+      return cloudRepo.synthesizeSpeech(request);
+    }
+    return offlineRepo.synthesizeSpeech(request);
+  }
+
+  @override
+  Future<List<int>> synthesizeSpeechAudio(TtsRequest request) async {
+    if (await isOnline()) {
+      return cloudRepo.synthesizeSpeechAudio(request);
+    }
+    return offlineRepo.synthesizeSpeechAudio(request);
+  }
+
+  @override
+  Future<SttResponse> transcribeAudio({
+    required List<int> audioBytes,
+    required String filename,
+    String languageCode = 'od-IN',
+    String mode = 'codemix',
+    String? keytermsCsv,
+  }) async {
+    if (await isOnline()) {
+      return cloudRepo.transcribeAudio(
+        audioBytes: audioBytes,
+        filename: filename,
+        languageCode: languageCode,
+        mode: mode,
+        keytermsCsv: keytermsCsv,
+      );
+    }
+    return offlineRepo.transcribeAudio(
+      audioBytes: audioBytes,
+      filename: filename,
+      languageCode: languageCode,
+      mode: mode,
+      keytermsCsv: keytermsCsv,
+    );
   }
 }

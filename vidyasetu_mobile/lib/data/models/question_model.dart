@@ -101,6 +101,9 @@ class RecoveryPracticeQuestionModel {
   }
 }
 
+/// Alias ensuring 1:1 schema parity with backend RecoveryPracticeQuestionPublic.
+typedef RecoveryPracticeQuestionPublic = RecoveryPracticeQuestionModel;
+
 /// Question model representing curriculum items.
 /// In public responses from the cloud, `correctAnswer` is stripped.
 /// In offline packs and local SQLite cache, `correctAnswer` is present for edge grading.

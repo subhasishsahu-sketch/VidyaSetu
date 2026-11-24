@@ -8,6 +8,7 @@ import '../models/diagnostic_model.dart';
 import '../models/language_model.dart';
 import '../models/offline_pack_model.dart';
 import '../models/sync_batch_model.dart';
+import '../models/voice_model.dart';
 import '../../core/offline/local_database.dart';
 import '../../core/offline/mastery_calculator.dart';
 import '../../core/offline/behavioral_analyzer.dart';
@@ -573,6 +574,27 @@ class OfflineVidyaSetuRepository implements VidyaSetuRepository {
   Future<OfflineSyncBatchResponse> syncPendingOfflineEvents({String? studentId}) async {
     // In offline mode, no sync occurs
     return const OfflineSyncBatchResponse();
+  }
+
+  @override
+  Future<TtsResponse> synthesizeSpeech(TtsRequest request) async {
+    throw StateError('Voice playback requires internet connection');
+  }
+
+  @override
+  Future<List<int>> synthesizeSpeechAudio(TtsRequest request) async {
+    throw StateError('Voice playback requires internet connection');
+  }
+
+  @override
+  Future<SttResponse> transcribeAudio({
+    required List<int> audioBytes,
+    required String filename,
+    String languageCode = 'od-IN',
+    String mode = 'codemix',
+    String? keytermsCsv,
+  }) async {
+    throw StateError('Voice transcription requires internet connection');
   }
 }
 

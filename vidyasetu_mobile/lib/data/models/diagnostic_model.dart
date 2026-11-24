@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'question_model.dart';
+export 'question_model.dart';
 
 /// Categorical 7-parameter behavioral snapshot.
 @immutable

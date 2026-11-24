@@ -1,0 +1,44 @@
+{
+  "audit_status": "AUTONOMOUS AUDIT COMPLETE",
+  "engine_status": "Local SLM Active",
+  "title": "Adaptive Replan & Offline Recovery",
+  "subtitle": "Sunita's Intelligent Study Engine • BSE Odisha Class 10",
+  "resolved_gap": "Resolved pinpoint gap: 5-Year Plans vs State Board terminology in History Section B.",
+  "step_4_replan": {
+    "step_label": "STEP 4 • AUTONOMOUS REPLAN",
+    "title": "Study Plan Updated Automatically",
+    "description": "Based on your terminology confusion in Question 3, the local agent has seamlessly adapted your personalized roadmap for maximum retention.",
+    "micro_lesson": {
+      "tag": "SCHEDULED 8-MIN MICRO-LESSON",
+      "title": "Five-Year Plans & Odisha's Industrial ...",
+      "focus": "Focus: Rourkela Steel Plant & Hirakud Dam integration",
+      "slot": "Tomorrow 7:00 AM • 15-min phone slot",
+      "projected_gain": "+12 projected marks in Section B",
+      "pacing_note": "“Syllabus pacing adjusted: You will cover this before tackling the 1971 Industrial Policy module.”"
+    }
+  },
+  "step_5_storage": {
+    "step_label": "STEP 5 • STORAGE VERIFIED",
+    "title": "Offline Diagnostic Pack Cached",
+    "details": "5 Diagnostic Flashcards & 3 MCQs Cached into Device Storage",
+    "network_badge": "0 KB Internet Needed",
+    "commit_id": "SQLite local commit #BSE-402",
+    "storage_used": "Storage used: 142 KB in local SQLite",
+    "ready_percent": "100% Ready",
+    "checkpoints": [
+      "Odia & English Audio Explanation Cached",
+      "Text Flashcards Ready with Vernacular Hints",
+      "Zero-Lag Offline Practice Session Prepared"
+    ]
+  },
+  "step_6_quiz": {
+    "step_label": "STEP 6 • ACTION READY",
+    "title": "Recovery Quiz Ready",
+    "description": "Test yourself on Planning Commission vs State Planning Board right now to regain your lost mastery score and keep your streak alive.",
+    "estimated_time": "2 Minutes (3 Quick MCQs)",
+    "reward_xp": "+100 XP",
+    "button_label": "Take 2-Min Recovery Check ➔",
+    "secondary_label": "Back to Home / ମୁଖ୍ୟ ପୃଷ୍ଠାକୁ ଫେରନ୍ତୁ"
+  },
+  "footer_sync": "School Mesh Auto-Sync Enabled • Will sync scores with master tablet when at school"
+}

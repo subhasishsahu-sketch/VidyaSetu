@@ -1,0 +1,24 @@
+{
+  "student_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+  "name": "Sunita",
+  "class_grade": 10,
+  "board": "BSE Odisha",
+  "preferred_language": "Odia",
+  "english_exposure_level": 1,
+  "subject": "History",
+  "daily_goal_minutes": 15,
+  "completed_minutes": 10,
+  "remaining_minutes": 5,
+  "goal_percentage": 65,
+  "streak_days": 7,
+  "school_mesh_peers_synced": 22,
+  "offline_slm_active": true,
+  "active_chapter": {
+    "subject": "History",
+    "title_en": "India After Independence",
+    "title_or": "ସ୍ୱାଧୀନତା ପରବର୍ତ୍ତୀ ଭାରତ",
+    "chapter_no": 1,
+    "section_no": 2,
+    "status": "Ready Offline"
+  }
+}

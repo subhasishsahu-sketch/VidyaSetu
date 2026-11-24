@@ -1,0 +1,46 @@
+[
+  {
+    "id": "hist",
+    "name_en": "History",
+    "name_or": "ଇତିହାସ",
+    "code": "HIST",
+    "icon": "account_balance",
+    "total_chapters": 4,
+    "completed_chapters": 1,
+    "mastery_percent": 88,
+    "is_cached": true
+  },
+  {
+    "id": "phys",
+    "name_en": "Physical Science",
+    "name_or": "ଭୌତିକ ବିଜ୍ଞାନ",
+    "code": "PHYS",
+    "icon": "bolt",
+    "total_chapters": 6,
+    "completed_chapters": 2,
+    "mastery_percent": 74,
+    "is_cached": true
+  },
+  {
+    "id": "bio",
+    "name_en": "Life Science",
+    "name_or": "ଜୀବ ବିଜ୍ଞାନ",
+    "code": "BIO",
+    "icon": "eco",
+    "total_chapters": 5,
+    "completed_chapters": 1,
+    "mastery_percent": 68,
+    "is_cached": true
+  },
+  {
+    "id": "math",
+    "name_en": "Mathematics",
+    "name_or": "ଗଣିତ",
+    "code": "MATH",
+    "icon": "calculate",
+    "total_chapters": 8,
+    "completed_chapters": 3,
+    "mastery_percent": 82,
+    "is_cached": true
+  }
+]

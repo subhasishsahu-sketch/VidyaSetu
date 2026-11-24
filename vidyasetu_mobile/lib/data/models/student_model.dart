@@ -53,6 +53,12 @@ class StudentModel {
   final Map<String, dynamic>? recommendedNextTask;
   final DateTime createdAt;
 
+  // Derived / UI helper fields with safe defaults (zero backend serialization impact)
+  final int goalPercentage;
+  final int completedMinutes;
+  final int remainingMinutes;
+  final int dailyGoalMinutes;
+
   const StudentModel({
     required this.studentId,
     required this.name,
@@ -63,6 +69,10 @@ class StudentModel {
     this.completedChapters = 0,
     this.recommendedNextTask,
     required this.createdAt,
+    this.goalPercentage = 0,
+    this.completedMinutes = 0,
+    this.remainingMinutes = 15,
+    this.dailyGoalMinutes = 15,
   });
 
   Map<String, dynamic> toJson() {
@@ -98,6 +108,10 @@ class StudentModel {
           ? Map<String, dynamic>.from(json['recommended_next_task'] as Map)
           : null,
       createdAt: created,
+      goalPercentage: ((json['goal_percentage'] as num?) ?? 0).toInt(),
+      completedMinutes: ((json['completed_minutes'] as num?) ?? 0).toInt(),
+      remainingMinutes: ((json['remaining_minutes'] as num?) ?? 15).toInt(),
+      dailyGoalMinutes: ((json['daily_goal_minutes'] as num?) ?? 15).toInt(),
     );
   }
 
@@ -111,6 +125,10 @@ class StudentModel {
     int? completedChapters,
     Map<String, dynamic>? recommendedNextTask,
     DateTime? createdAt,
+    int? goalPercentage,
+    int? completedMinutes,
+    int? remainingMinutes,
+    int? dailyGoalMinutes,
   }) {
     return StudentModel(
       studentId: studentId ?? this.studentId,
@@ -122,6 +140,10 @@ class StudentModel {
       completedChapters: completedChapters ?? this.completedChapters,
       recommendedNextTask: recommendedNextTask ?? this.recommendedNextTask,
       createdAt: createdAt ?? this.createdAt,
+      goalPercentage: goalPercentage ?? this.goalPercentage,
+      completedMinutes: completedMinutes ?? this.completedMinutes,
+      remainingMinutes: remainingMinutes ?? this.remainingMinutes,
+      dailyGoalMinutes: dailyGoalMinutes ?? this.dailyGoalMinutes,
     );
   }
 }

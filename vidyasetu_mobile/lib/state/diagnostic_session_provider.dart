@@ -6,6 +6,7 @@ import '../data/models/question_model.dart';
 import '../models/question.dart';
 import '../models/diagnostic_result.dart';
 import '../data/repositories/vidyasetu_repository.dart';
+import 'locale_provider.dart';
 import 'repository_provider.dart';
 import 'student_profile_provider.dart';
 
@@ -14,6 +15,7 @@ class DiagnosticSessionState {
   final int currentQuestionIndex;
   final String? selectedOptionId;
   final bool isSubmitted;
+  final bool? isCorrect;
   final DiagnosticResult? whyResult;
   final AttemptResponse? attemptResponse;
   final ProbeResponseResult? probeResult;
@@ -26,6 +28,9 @@ class DiagnosticSessionState {
   final bool isLoading;
   final bool isSubmittingProbe;
   final bool isSubmittingRecovery;
+  final bool isSessionCompleted;
+  final int correctAnswersCount;
+  final String? currentChapterId;
   final String? error;
 
   const DiagnosticSessionState({
@@ -33,6 +38,7 @@ class DiagnosticSessionState {
     this.currentQuestionIndex = 0,
     this.selectedOptionId,
     this.isSubmitted = false,
+    this.isCorrect,
     this.whyResult,
     this.attemptResponse,
     this.probeResult,
@@ -45,6 +51,9 @@ class DiagnosticSessionState {
     this.isLoading = false,
     this.isSubmittingProbe = false,
     this.isSubmittingRecovery = false,
+    this.isSessionCompleted = false,
+    this.correctAnswersCount = 0,
+    this.currentChapterId,
     this.error,
   });
 
@@ -58,6 +67,7 @@ class DiagnosticSessionState {
     int? currentQuestionIndex,
     String? selectedOptionId,
     bool? isSubmitted,
+    bool? isCorrect,
     DiagnosticResult? whyResult,
     AttemptResponse? attemptResponse,
     ProbeResponseResult? probeResult,
@@ -70,6 +80,9 @@ class DiagnosticSessionState {
     bool? isLoading,
     bool? isSubmittingProbe,
     bool? isSubmittingRecovery,
+    bool? isSessionCompleted,
+    int? correctAnswersCount,
+    String? currentChapterId,
     String? error,
   }) {
     return DiagnosticSessionState(
@@ -77,6 +90,7 @@ class DiagnosticSessionState {
       currentQuestionIndex: currentQuestionIndex ?? this.currentQuestionIndex,
       selectedOptionId: selectedOptionId ?? this.selectedOptionId,
       isSubmitted: isSubmitted ?? this.isSubmitted,
+      isCorrect: isCorrect ?? this.isCorrect,
       whyResult: whyResult ?? this.whyResult,
       attemptResponse: attemptResponse ?? this.attemptResponse,
       probeResult: probeResult ?? this.probeResult,
@@ -89,6 +103,9 @@ class DiagnosticSessionState {
       isLoading: isLoading ?? this.isLoading,
       isSubmittingProbe: isSubmittingProbe ?? this.isSubmittingProbe,
       isSubmittingRecovery: isSubmittingRecovery ?? this.isSubmittingRecovery,
+      isSessionCompleted: isSessionCompleted ?? this.isSessionCompleted,
+      correctAnswersCount: correctAnswersCount ?? this.correctAnswersCount,
+      currentChapterId: currentChapterId ?? this.currentChapterId,
       error: error,
     );
   }
@@ -104,25 +121,75 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
     loadSession();
   }
 
-  Future<void> loadSession() async {
-    state = state.copyWith(isLoading: true);
-    final qs = await MockDataStore.getQuestions();
+  /// Loads the question series for the specified chapter, mapping repository models
+  /// to UI question cards and defaulting gracefully to cached/mock questions.
+  Future<void> loadSession({String? chapterId}) async {
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      currentChapterId: chapterId,
+      currentQuestionIndex: 0,
+      selectedOptionId: null,
+      isSubmitted: false,
+      isCorrect: null,
+      whyResult: null,
+      attemptResponse: null,
+      probeResult: null,
+      recoveryResult: null,
+      activeProbe: null,
+      selectedProbeOption: null,
+      recoveryQuestion: null,
+      selectedRecoveryOption: null,
+      isSessionCompleted: false,
+      correctAnswersCount: 0,
+    );
 
-    // Default to Question 3 (index 2) to showcase Question 3 diagnostic scenario
-    final initialIndex = (qs.length >= 3) ? 2 : 0;
+    List<Question> loadedQuestions = [];
+    try {
+      String? subjectFilter;
+      String? chapterFilter;
+
+      if (chapterId != null) {
+        if (chapterId.startsWith('HIST')) {
+          subjectFilter = 'History';
+        } else if (chapterId.startsWith('PHYS') || chapterId.startsWith('BIO') || chapterId.startsWith('SCI')) {
+          subjectFilter = 'Science';
+        } else if (chapterId.startsWith('MATH')) {
+          subjectFilter = 'Math';
+        } else if (chapterId.startsWith('GEOG')) {
+          subjectFilter = 'Geography';
+        }
+      }
+
+      final repoQuestions = await _repository.getQuestions(
+        subject: subjectFilter,
+        chapterName: chapterFilter,
+      );
+
+      if (repoQuestions.isNotEmpty) {
+        loadedQuestions = repoQuestions.asMap().entries.map((entry) {
+          return Question.fromQuestionModel(
+            entry.value,
+            stepNumber: entry.key + 1,
+            totalSteps: repoQuestions.length,
+          );
+        }).toList();
+      }
+    } catch (_) {}
+
+    // Fallback to structured multi-question series if repository returns empty
+    if (loadedQuestions.isEmpty) {
+      final mockQs = await MockDataStore.getQuestions();
+      loadedQuestions = mockQs;
+    }
 
     state = state.copyWith(
-      questions: qs,
-      currentQuestionIndex: initialIndex,
+      questions: loadedQuestions,
+      currentQuestionIndex: 0,
       isLoading: false,
     );
 
     telemetry.startQuestion();
-
-    if (qs.isNotEmpty && initialIndex < qs.length && qs[initialIndex].id == 'HIST_CH2_Q03') {
-      selectOption('B');
-      await submitAnswer();
-    }
   }
 
   void selectOption(String optionId) {
@@ -131,7 +198,7 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
     state = state.copyWith(selectedOptionId: optionId);
   }
 
-  /// Step A: Submits Question Attempt Telemetry to trigger WHY Engine.
+  /// Step 1: Submits Question Attempt Telemetry to trigger WHY Engine.
   Future<void> submitAnswer() async {
     final currentQ = state.currentQuestion;
     if (currentQ == null || state.selectedOptionId == null) return;
@@ -140,7 +207,11 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
     final studentId = studentProfile?.studentId ?? '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d';
     final questionId = currentQ.id;
 
+    final lang = _ref.read(localeProvider);
+    final langPref = lang == AppLanguage.odia ? 'Odia' : 'English';
+
     AttemptResponse? attemptRes;
+    String? submitError;
     try {
       attemptRes = await _repository.submitAttempt(
         AttemptRequest(
@@ -152,35 +223,76 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
           confidenceRating: telemetry.inferredConfidence == 'low' ? 30.0 : 85.0,
         ),
       );
-    } catch (_) {}
+    } catch (e) {
+      submitError = e.toString();
+    }
+
+    final isCorrect = attemptRes?.isCorrect ??
+        (currentQ.correctOptionId.isNotEmpty &&
+            state.selectedOptionId == currentQ.correctOptionId);
+
+    if (isCorrect) {
+      // Correct attempt: celebrate and allow advancing to next question without WHY drawer
+      state = state.copyWith(
+        isSubmitted: true,
+        isCorrect: true,
+        whyResult: null,
+        attemptResponse: attemptRes,
+        correctAnswersCount: state.correctAnswersCount + 1,
+        error: submitError,
+      );
+      return;
+    }
+
+    // Incorrect attempt: Trigger WHY Engine loop
+    final topHypo = (attemptRes != null && attemptRes.candidateHypotheses.isNotEmpty)
+        ? attemptRes.candidateHypotheses.first
+        : null;
 
     DiagnosticResult diag;
-    try {
-      diag = await MockDataStore.getDiagnosticResult(currentQ.id);
-    } catch (_) {
-      diag = const DiagnosticResult(
-        questionId: 'HIST_CH2_Q03',
-        diagnosisTitle: 'Careless Terminology Confusion',
-        diagnosisTitleOr: 'ଅସାବଧାନତା ଜନିତ ଶବ୍ଦାବଳୀ ଭ୍ରାନ୍ତି',
-        certaintyPercent: 94,
+    if (topHypo != null) {
+      diag = DiagnosticResult(
+        questionId: questionId,
+        diagnosisTitle: _formatHypothesisTitle(topHypo.hypothesis),
+        diagnosisTitleOr: _formatHypothesisTitleOr(topHypo.hypothesis),
+        certaintyPercent: (topHypo.score * 100).toInt(),
         sourceEngine: 'Causal Error Mapping • VidyaSetu Cognitive Engine',
         causalWhyTitle: 'କାହିଁକି ଏହି ଭୁଲ୍ ହେଲା? (Causal Why)',
-        causalWhyEn: 'State Planning Board vs Odisha Planning Commission confusion.',
-        causalWhyOr: 'ରାଜ୍ୟ ଯୋଜନା ବୋର୍ଡ ଭ୍ରାନ୍ତି।',
-        citation: 'BSE Ch 2: Independent Odisha Pg. 43',
+        causalWhyEn: topHypo.reason,
+        causalWhyOr: topHypo.reason,
+        citation: 'BSE Odisha Curriculum Citation',
         dbStorageBadge: 'Diagnostics indexed locally in SQLite DB • Auto-saved',
       );
+    } else {
+      try {
+        diag = await MockDataStore.getDiagnosticResult(questionId);
+      } catch (_) {
+        diag = const DiagnosticResult(
+          questionId: 'DIAG_Q',
+          diagnosisTitle: 'Conceptual Misunderstanding',
+          diagnosisTitleOr: 'ଧାରଣାଗତ ଭ୍ରାନ୍ତି',
+          certaintyPercent: 90,
+          sourceEngine: 'Causal Error Mapping • VidyaSetu Cognitive Engine',
+          causalWhyTitle: 'କାହିଁକି ଏହି ଭୁଲ୍ ହେଲା? (Causal Why)',
+          causalWhyEn: 'Conceptual discrepancy detected in option selection.',
+          causalWhyOr: 'ନିର୍ବାଚିତ ବିକଳ୍ପରେ ଧାରଣାଗତ ତ୍ରୁଟି ଦେଖାଦେଇଛି।',
+          citation: 'BSE Odisha Standards Pg. 43',
+          dbStorageBadge: 'Diagnostics indexed locally in SQLite DB • Auto-saved',
+        );
+      }
     }
 
     state = state.copyWith(
       isSubmitted: true,
+      isCorrect: false,
       whyResult: diag,
       attemptResponse: attemptRes,
       activeProbe: attemptRes?.selectedProbe,
+      error: submitError,
     );
   }
 
-  /// Step B: Submits student response to a diagnostic probe.
+  /// Step 2: Submits student response to the active diagnostic probe.
   Future<void> submitProbeAnswer(String probeOption) async {
     final analysisId = state.attemptResponse?.analysisId;
     final probeType = state.activeProbe?['probe_type']?.toString() ?? 'terminology_distinction';
@@ -188,6 +300,7 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
     state = state.copyWith(
       selectedProbeOption: probeOption,
       isSubmittingProbe: true,
+      error: null,
     );
 
     if (analysisId == null) {
@@ -207,16 +320,21 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
 
       DiagnosticResult? updatedWhy = state.whyResult;
       if (probeResult.confirmedHypothesis != null && updatedWhy != null) {
+        final intervention = probeResult.intervention;
+        final citationStr = intervention != null
+            ? intervention.textbookCitation
+            : updatedWhy.citation;
+
         updatedWhy = DiagnosticResult(
           questionId: updatedWhy.questionId,
-          diagnosisTitle: probeResult.confirmedHypothesis!,
-          diagnosisTitleOr: updatedWhy.diagnosisTitleOr,
+          diagnosisTitle: _formatHypothesisTitle(probeResult.confirmedHypothesis!),
+          diagnosisTitleOr: _formatHypothesisTitleOr(probeResult.confirmedHypothesis!),
           certaintyPercent: ((probeResult.confidenceScore ?? 0.94) * 100).toInt(),
           sourceEngine: updatedWhy.sourceEngine,
           causalWhyTitle: updatedWhy.causalWhyTitle,
-          causalWhyEn: probeResult.intervention?.pureEnglishExplanation ?? updatedWhy.causalWhyEn,
-          causalWhyOr: probeResult.intervention?.pureOdiaExplanation ?? updatedWhy.causalWhyOr,
-          citation: updatedWhy.citation,
+          causalWhyEn: intervention?.pureEnglishExplanation ?? updatedWhy.causalWhyEn,
+          causalWhyOr: intervention?.pureOdiaExplanation ?? updatedWhy.causalWhyOr,
+          citation: citationStr,
           dbStorageBadge: updatedWhy.dbStorageBadge,
         );
       }
@@ -229,11 +347,11 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
         isSubmittingProbe: false,
       );
     } catch (e) {
-      state = state.copyWith(isSubmittingProbe: false, error: e.toString());
+      state = state.copyWith(isSubmittingProbe: false, error: 'Probe submission failed: $e');
     }
   }
 
-  /// Step C: Submits student answer to immediate recovery practice question.
+  /// Step 3: Submits student answer to immediate recovery practice question.
   Future<void> submitRecoveryAnswer(String recoveryOption) async {
     final analysisId = state.attemptResponse?.analysisId ?? state.probeResult?.analysisId;
     final recoveryQ = state.recoveryQuestion;
@@ -241,6 +359,7 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
     state = state.copyWith(
       selectedRecoveryOption: recoveryOption,
       isSubmittingRecovery: true,
+      error: null,
     );
 
     if (analysisId == null || recoveryQ == null) {
@@ -265,7 +384,7 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
         isSubmittingRecovery: false,
       );
     } catch (e) {
-      state = state.copyWith(isSubmittingRecovery: false, error: e.toString());
+      state = state.copyWith(isSubmittingRecovery: false, error: 'Recovery submission failed: $e');
     }
   }
 
@@ -279,6 +398,7 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
     state = state.copyWith(revisionQuestionIds: set);
   }
 
+  /// Advances to next question in sequence, or sets session completed if at the end.
   void nextQuestion() {
     if (state.currentQuestionIndex < state.questions.length - 1) {
       final nextIdx = state.currentQuestionIndex + 1;
@@ -286,6 +406,7 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
         currentQuestionIndex: nextIdx,
         selectedOptionId: null,
         isSubmitted: false,
+        isCorrect: null,
         whyResult: null,
         attemptResponse: null,
         probeResult: null,
@@ -294,8 +415,47 @@ class DiagnosticSessionNotifier extends StateNotifier<DiagnosticSessionState> {
         selectedProbeOption: null,
         recoveryQuestion: null,
         selectedRecoveryOption: null,
+        error: null,
       );
       telemetry.startQuestion();
+    } else {
+      state = state.copyWith(isSessionCompleted: true);
+    }
+  }
+
+  void restartSession() {
+    loadSession(chapterId: state.currentChapterId);
+  }
+
+  String _formatHypothesisTitle(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'careless_mistake':
+        return 'Careless Terminology Confusion';
+      case 'time_pressure':
+        return 'Time Pressure & Pacing Rush';
+      case 'language_barrier':
+        return 'Language Comprehension Barrier';
+      case 'prerequisite_gap':
+        return 'Prerequisite Foundation Gap';
+      case 'conceptual_misunderstanding':
+      default:
+        return 'Conceptual Misunderstanding';
+    }
+  }
+
+  String _formatHypothesisTitleOr(String raw) {
+    switch (raw.toLowerCase()) {
+      case 'careless_mistake':
+        return 'ଅସାବଧାନତା ଜନିତ ଶବ୍ଦାବଳୀ ଭ୍ରାନ୍ତି';
+      case 'time_pressure':
+        return 'ସମୟ ଚାପ ଓ ବ୍ୟସ୍ତତା';
+      case 'language_barrier':
+        return 'ଭାଷାଗତ ବୁଝାମଣା ପ୍ରତିବନ୍ଧକ';
+      case 'prerequisite_gap':
+        return 'ପୂର୍ବ ଧାରଣାର ଅଭାବ';
+      case 'conceptual_misunderstanding':
+      default:
+        return 'ଧାରଣାଗତ ଭ୍ରାନ୍ତି';
     }
   }
 }

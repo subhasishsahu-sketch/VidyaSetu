@@ -36,13 +36,16 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/test',
-      pageBuilder: (context, state) => CustomTransitionPage(
-        key: state.pageKey,
-        child: const TestScreen(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-      ),
+      pageBuilder: (context, state) {
+        final chapterId = state.uri.queryParameters['chapterId'];
+        return CustomTransitionPage(
+          key: state.pageKey,
+          child: TestScreen(chapterId: chapterId),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        );
+      },
     ),
     GoRoute(
       path: '/repair',

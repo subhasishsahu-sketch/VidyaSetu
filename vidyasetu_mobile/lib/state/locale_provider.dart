@@ -19,3 +19,6 @@ class LocaleNotifier extends StateNotifier<AppLanguage> {
 final localeProvider = StateNotifierProvider<LocaleNotifier, AppLanguage>((ref) {
   return LocaleNotifier();
 });
+
+/// Alias provider for semantic consistency across components
+final languageProvider = localeProvider;

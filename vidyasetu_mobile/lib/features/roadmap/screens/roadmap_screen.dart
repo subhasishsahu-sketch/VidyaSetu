@@ -75,6 +75,9 @@ class RoadmapScreen extends ConsumerWidget {
                                 .read(roadmapProvider.notifier)
                                 .toggleChapterExpanded(ch.chapterId);
                           },
+                          onActionTap: () {
+                            context.push('/test?chapterId=${ch.chapterId}');
+                          },
                           isOdia: isOdia,
                         );
                       }).toList(),
@@ -97,7 +100,8 @@ class RoadmapScreen extends ConsumerWidget {
                         isOdia: isOdia,
                         onActionTap: () {
                           // Navigates to active test session or concept repair
-                          context.push('/test');
+                          context.push(
+                              '/test?chapterId=${currentRoadmap.currentChapter.chapterId}');
                         },
                       ),
                       const SizedBox(height: 16),
@@ -118,6 +122,9 @@ class RoadmapScreen extends ConsumerWidget {
                             chapter: ch,
                             isLocked: true,
                             isOdia: isOdia,
+                            onActionTap: () {
+                              context.push('/test?chapterId=${ch.chapterId}');
+                            },
                           ),
                         );
                       }).toList(),

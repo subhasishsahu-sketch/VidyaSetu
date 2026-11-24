@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/voice_model.dart';
 import '../data/repositories/vidyasetu_repository.dart';
+import '../state/repository_provider.dart';
 
 enum AudioState { stopped, playing, paused, loading, error }
 
@@ -181,3 +183,10 @@ class AudioPlayerService extends ChangeNotifier {
     super.dispose();
   }
 }
+
+final audioPlayerServiceProvider = ChangeNotifierProvider<AudioPlayerService>((ref) {
+  final repo = ref.watch(vidyasetuRepositoryProvider);
+  final service = AudioPlayerService(repository: repo);
+  ref.onDispose(() => service.dispose());
+  return service;
+});

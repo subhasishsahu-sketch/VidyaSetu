@@ -6,11 +6,13 @@ import '../../../services/audio_service.dart';
 class AudioPlayerWidget extends StatefulWidget {
   final AudioPlayerService service;
   final bool isOdia;
+  final String? textToSpeak;
 
   const AudioPlayerWidget({
     Key? key,
     required this.service,
     required this.isOdia,
+    this.textToSpeak,
   }) : super(key: key);
 
   @override
@@ -153,7 +155,18 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
 
                   // Play/Pause circular button
                   GestureDetector(
-                    onTap: () => widget.service.togglePlayPause(),
+                    onTap: () {
+                      if (state.state == AudioState.stopped &&
+                          widget.textToSpeak != null &&
+                          widget.textToSpeak!.isNotEmpty) {
+                        widget.service.playSynthesizedText(
+                          text: widget.textToSpeak!,
+                          languageCode: widget.isOdia ? 'od-IN' : 'en-IN',
+                        );
+                      } else {
+                        widget.service.togglePlayPause();
+                      }
+                    },
                     child: Container(
                       width: 50,
                       height: 50,
@@ -163,7 +176,11 @@ class _AudioPlayerWidgetState extends State<AudioPlayerWidget> {
                       ),
                       child: Center(
                         child: Icon(
-                          isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          state.state == AudioState.loading
+                              ? Icons.hourglass_top_rounded
+                              : (isPlaying
+                                  ? Icons.pause_rounded
+                                  : Icons.play_arrow_rounded),
                           color: Colors.white,
                           size: 28,
                         ),

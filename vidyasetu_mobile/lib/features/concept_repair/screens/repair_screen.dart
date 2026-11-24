@@ -16,11 +16,7 @@ import '../widgets/citation_card.dart';
 import '../widgets/rourkela_reference_card.dart';
 import '../widgets/audio_player_widget.dart';
 
-final audioServiceProvider = Provider<AudioPlayerService>((ref) {
-  final service = AudioPlayerService();
-  ref.onDispose(() => service.dispose());
-  return service;
-});
+final audioServiceProvider = audioPlayerServiceProvider;
 
 class RepairScreen extends ConsumerStatefulWidget {
   const RepairScreen({Key? key}) : super(key: key);
@@ -113,6 +109,7 @@ class _RepairScreenState extends ConsumerState<RepairScreen> {
                     AudioPlayerWidget(
                       service: audioService,
                       isOdia: isOdia,
+                      textToSpeak: isOdia ? exp.pureOdia : exp.pureEnglish,
                     ),
                     const SizedBox(height: 14),
 

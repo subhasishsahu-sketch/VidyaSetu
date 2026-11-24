@@ -46,4 +46,28 @@ class Subject {
         'mastery_percent': masteryPercent,
         'is_cached': isCached,
       };
+
+  Subject copyWith({
+    String? id,
+    String? nameEn,
+    String? nameOr,
+    String? code,
+    String? icon,
+    int? totalChapters,
+    int? completedChapters,
+    int? masteryPercent,
+    bool? isCached,
+  }) {
+    return Subject(
+      id: id ?? this.id,
+      nameEn: nameEn ?? this.nameEn,
+      nameOr: nameOr ?? this.nameOr,
+      code: code ?? this.code,
+      icon: icon ?? this.icon,
+      totalChapters: totalChapters ?? this.totalChapters,
+      completedChapters: completedChapters ?? this.completedChapters,
+      masteryPercent: masteryPercent ?? this.masteryPercent,
+      isCached: isCached ?? this.isCached,
+    );
+  }
 }

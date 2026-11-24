@@ -10,12 +10,16 @@ class AppConfig {
 
   /// Dynamically resolved base API URL.
   /// Priority:
-  /// 1. `--dart-define=API_BASE_URL=...`
+  /// 1. `--dart-define=API_BASE_URL=...` (auto-appends `/api/v1` if omitted)
   /// 2. Android Emulator -> `http://10.0.2.2:8000/api/v1`
   /// 3. Windows / macOS / Linux / Web -> `http://localhost:8000/api/v1`
   static String get apiBaseUrl {
     if (_envBaseUrl.isNotEmpty) {
-      return _envBaseUrl;
+      final trimmed = _envBaseUrl.trim().replaceAll(RegExp(r'/+$'), '');
+      if (trimmed.endsWith('/api/v1')) {
+        return trimmed;
+      }
+      return '$trimmed/api/v1';
     }
     if (!kIsWeb && Platform.isAndroid) {
       return 'http://10.0.2.2:8000/api/v1';

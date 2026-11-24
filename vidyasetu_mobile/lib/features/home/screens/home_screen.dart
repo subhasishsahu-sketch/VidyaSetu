@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/theme/typography.dart';
+import '../../../data/models/student_model.dart';
 import '../../../shared_widgets/app_header.dart';
 import '../../../shared_widgets/bottom_nav_bar.dart';
 import '../../../state/locale_provider.dart';
@@ -59,7 +60,14 @@ class HomeScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
 
                       // Sunita's Greeting & Daily Progress Card
-                      _buildGreetingCard(context, isOdia, student),
+                      _buildGreetingCard(
+                        context,
+                        isOdia,
+                        student,
+                        profileState.goalPercentage > 0
+                            ? profileState.goalPercentage
+                            : (student?.goalPercentage ?? 0),
+                      ),
                       const SizedBox(height: 16),
 
                       // Subject Selection Pills
@@ -96,7 +104,10 @@ class HomeScreen extends ConsumerWidget {
                       DiagnosticAssessmentCard(
                         isOdia: isOdia,
                         onTap: () {
-                          context.push('/test');
+                          final activeChapterId = roadmapState
+                                  .currentRoadmap?.currentChapter.chapterId ??
+                              'HIST_CH2';
+                          context.push('/test?chapterId=$activeChapterId');
                         },
                       ),
                       const SizedBox(height: 16),
@@ -173,7 +184,7 @@ class HomeScreen extends ConsumerWidget {
   }
 
   Widget _buildGreetingCard(
-      BuildContext context, bool isOdia, dynamic student) {
+      BuildContext context, bool isOdia, StudentModel? student, int goalPercentage) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceWhite,
@@ -238,9 +249,9 @@ class HomeScreen extends ConsumerWidget {
 
           // Daily Progress Circular Indicator
           GoalRing(
-            percentage: student?.goalPercentage ?? 65,
-            completedMinutes: student?.completedMinutes ?? 10,
-            remainingMinutes: student?.remainingMinutes ?? 5,
+            percentage: goalPercentage,
+            completedMinutes: student?.completedMinutes ?? 0,
+            remainingMinutes: student?.remainingMinutes ?? 15,
             totalMinutes: student?.dailyGoalMinutes ?? 15,
             isOdia: isOdia,
           ),

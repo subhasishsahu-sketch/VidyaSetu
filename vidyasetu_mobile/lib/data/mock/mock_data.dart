@@ -229,8 +229,58 @@ class MockDataStore {
           .toList();
       return _cachedQuestions!;
     } catch (_) {
-      return [
-        const Question(
+      return const [
+        Question(
+          id: 'HIST_CH2_Q01',
+          stepNumber: 1,
+          totalSteps: 5,
+          subject: 'History',
+          topic: 'Post-Partition Challenges',
+          typeBadgeEn: 'Q1 • Objective Type (1 Mark)',
+          typeBadgeOr: 'ପ୍ର୧ • ବସ୍ତୁନିଷ୍ଠ ପ୍ରଶ୍ନ (୧ ମାର୍କ)',
+          standard: 'BSE Odisha Standard',
+          questionTextEn:
+              'In which year did India adopt its Constitution, becoming a sovereign democratic republic?',
+          questionTextOr:
+              'କେଉଁ ବର୍ଷ ଭାରତ ନିଜର ସମ୍ବିଧାନ ଗ୍ରହଣ କରି ଏକ ସାର୍ବଭୌମ ଗଣତାନ୍ତ୍ରିକ ଗଣରାଜ୍ୟ ହେଲା?',
+          options: [
+            AnswerOption(id: 'A', textEn: '1947', textOr: '୧୯୪୭'),
+            AnswerOption(id: 'B', textEn: '1950', textOr: '୧୯୫୦'),
+            AnswerOption(id: 'C', textEn: '1952', textOr: '୧୯୫୨'),
+            AnswerOption(id: 'D', textEn: '1948', textOr: '୧୯୪୮'),
+          ],
+          correctOptionId: 'B',
+        ),
+        Question(
+          id: 'HIST_CH2_Q02',
+          stepNumber: 2,
+          totalSteps: 5,
+          subject: 'History',
+          topic: 'First Five-Year Plan',
+          typeBadgeEn: 'Q2 • Objective Type (1 Mark)',
+          typeBadgeOr: 'ପ୍ର୨ • ବସ୍ତୁନିଷ୍ଠ ପ୍ରଶ୍ନ (୧ ମାର୍କ)',
+          standard: 'BSE Odisha Standard',
+          questionTextEn:
+              'What was the primary sector emphasized during India\'s First Five-Year Plan?',
+          questionTextOr:
+              'ଭାରତର ପ୍ରଥମ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନାରେ ମୁଖ୍ୟତଃ କେଉଁ କ୍ଷେତ୍ର ଉପରେ ଗୁରୁତ୍ୱ ଦିଆଯାଇଥିଲା?',
+          options: [
+            AnswerOption(
+                id: 'A',
+                textEn: 'Agriculture & Irrigation',
+                textOr: 'କୃଷି ଓ ଜଳସେଚନ'),
+            AnswerOption(
+                id: 'B', textEn: 'Heavy Industries', textOr: 'ଭାରୀ ଶିଳ୍ପ'),
+            AnswerOption(
+                id: 'C',
+                textEn: 'Information Technology',
+                textOr: 'ସୂଚନା ପ୍ରଯୁକ୍ତିବିଦ୍ୟା'),
+            AnswerOption(
+                id: 'D', textEn: 'Foreign Trade', textOr: 'ବୈଦେଶିକ ବାଣିଜ୍ୟ'),
+          ],
+          correctOptionId: 'A',
+        ),
+        Question(
           id: 'HIST_CH2_Q03',
           stepNumber: 3,
           totalSteps: 5,
@@ -250,11 +300,11 @@ class MockDataStore {
                 textOr: 'ଭାରତର ଯୋଜନା ଆୟୋଗ'),
             AnswerOption(
                 id: 'B',
-                textEn: 'B) Odisha Planning Commission',
+                textEn: 'Odisha Planning Commission',
                 textOr: 'ଓଡ଼ିଶା ଯୋଜନା ଆୟୋଗ'),
             AnswerOption(
                 id: 'C',
-                textEn: 'C) State Planning Board',
+                textEn: 'State Planning Board',
                 textOr: 'ରାଜ୍ୟ ଯୋଜନା ବୋର୍ଡ'),
             AnswerOption(
                 id: 'D',
@@ -262,6 +312,70 @@ class MockDataStore {
                 textOr: 'ବିକାଶ ପରିଷଦ'),
           ],
           correctOptionId: 'C',
+        ),
+        Question(
+          id: 'HIST_CH2_Q04',
+          stepNumber: 4,
+          totalSteps: 5,
+          subject: 'History',
+          topic: 'Industrial Policy & Odisha',
+          typeBadgeEn: 'Q4 • Objective Type (1 Mark)',
+          typeBadgeOr: 'ପ୍ର୪ • ବସ୍ତୁନିଷ୍ଠ ପ୍ରଶ୍ନ (୧ ମାର୍କ)',
+          standard: 'BSE Odisha Standard',
+          questionTextEn:
+              'Which major public steel plant in Odisha was established with German technical collaboration under the Second Five-Year Plan?',
+          questionTextOr:
+              'ଦ୍ୱିତୀୟ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନାରେ ଜର୍ମାନୀ ସହଯୋଗରେ ଓଡ଼ିଶାର କେଉଁ ପ୍ରମୁଖ ଇସ୍ପାତ କାରଖାନା ସ୍ଥାପନ କରାଯାଇଥିଲା?',
+          options: [
+            AnswerOption(
+                id: 'A',
+                textEn: 'Bhilai Steel Plant',
+                textOr: 'ଭିଲାଇ ଇସ୍ପାତ କାରଖାନା'),
+            AnswerOption(
+                id: 'B',
+                textEn: 'Rourkela Steel Plant',
+                textOr: 'ରାଉରକେଲା ଇସ୍ପାତ କାରଖାନା'),
+            AnswerOption(
+                id: 'C',
+                textEn: 'Durgapur Steel Plant',
+                textOr: 'ଦୁର୍ଗାପୁର ଇସ୍ପାତ କାରଖାନା'),
+            AnswerOption(
+                id: 'D',
+                textEn: 'Bokaro Steel Plant',
+                textOr: 'ବୋକାରୋ ଇସ୍ପାତ କାରଖାନା'),
+          ],
+          correctOptionId: 'B',
+        ),
+        Question(
+          id: 'HIST_CH2_Q05',
+          stepNumber: 5,
+          totalSteps: 5,
+          subject: 'History',
+          topic: 'Agrarian Development & Dams',
+          typeBadgeEn: 'Q5 • Objective Type (1 Mark)',
+          typeBadgeOr: 'ପ୍ର୫ • ବସ୍ତୁନିଷ୍ଠ ପ୍ରଶ୍ନ (୧ ମାର୍କ)',
+          standard: 'BSE Odisha Standard',
+          questionTextEn:
+              'Hirakud Multipurpose Dam project on river Mahanadi was initiated under which five-year plan period?',
+          questionTextOr:
+              'ମହାନଦୀ ଉପରେ ହୀରାକୁଦ ବହୁମୁଖୀ ନଦୀବନ୍ଧ ଯୋଜନା କେଉଁ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା କାଳରେ କାର୍ଯ୍ୟକାରୀ ହୋଇଥିଲା?',
+          options: [
+            AnswerOption(
+                id: 'A',
+                textEn: 'First Five-Year Plan',
+                textOr: 'ପ୍ରଥମ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା'),
+            AnswerOption(
+                id: 'B',
+                textEn: 'Third Five-Year Plan',
+                textOr: 'ତୃତୀୟ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା'),
+            AnswerOption(
+                id: 'C',
+                textEn: 'Fourth Five-Year Plan',
+                textOr: 'ଚତୁର୍ଥ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା'),
+            AnswerOption(
+                id: 'D', textEn: 'Rolling Plan', textOr: 'ରୋଲିଂ ପ୍ଲାନ୍'),
+          ],
+          correctOptionId: 'A',
         ),
       ];
     }

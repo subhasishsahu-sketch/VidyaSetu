@@ -38,85 +38,89 @@ class ChapterCard extends StatelessWidget {
   }
 
   Widget _buildCompletedCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceWhite,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderHairline),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryPaddyGreen,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 20),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Ch ${chapter.chapterNo}: ${chapter.titleEn}',
-                      style: AppTypography.titleSmall(),
-                    ),
-                    if (isOdia)
-                      Text(
-                        '(${chapter.titleOr})',
-                        style: AppTypography.labelSmall(),
-                      ),
-                  ],
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFD4EED8),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  'Mastery: ${chapter.masteryPercent}%',
-                  style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
+    return InkWell(
+      onTap: onActionTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceWhite,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.cardBorderHairline),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
                     color: AppColors.primaryPaddyGreen,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check, color: Colors.white, size: 20),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ch ${chapter.chapterNo}: ${chapter.titleEn}',
+                        style: AppTypography.titleSmall(),
+                      ),
+                      if (isOdia)
+                        Text(
+                          '(${chapter.titleOr})',
+                          style: AppTypography.labelSmall(),
+                        ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${chapter.eventsMapped ?? "12/12 Key events mapped"} • Diagnostic cleared on ${chapter.clearedDate ?? "14 Oct"}',
-                style: AppTypography.labelSmall(
-                  color: AppColors.textMutedOlive,
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD4EED8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    'Mastery: ${chapter.masteryPercent}%',
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryPaddyGreen,
+                    ),
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(
-                  isExpanded
-                      ? Icons.keyboard_arrow_up
-                      : Icons.keyboard_arrow_down,
-                  color: AppColors.textMutedOlive,
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${chapter.eventsMapped ?? "12/12 Key events mapped"} • Diagnostic cleared on ${chapter.clearedDate ?? "14 Oct"}',
+                  style: AppTypography.labelSmall(
+                    color: AppColors.textMutedOlive,
+                  ),
                 ),
-                onPressed: onToggleExpand,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-            ],
-          ),
-        ],
+                IconButton(
+                  icon: Icon(
+                    isExpanded
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                    color: AppColors.textMutedOlive,
+                  ),
+                  onPressed: onToggleExpand,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -302,98 +306,102 @@ class ChapterCard extends StatelessWidget {
   }
 
   Widget _buildLockedCard() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFF3EE),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.cardBorderHairline),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
+    return InkWell(
+      onTap: onActionTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFEFF3EE),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.cardBorderHairline),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.lock_outline_rounded,
+                color: AppColors.textMutedOlive,
+                size: 18,
+              ),
             ),
-            child: const Icon(
-              Icons.lock_outline_rounded,
-              color: AppColors.textMutedOlive,
-              size: 18,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        chapter.titleEn,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textMutedOlive,
-                        ),
-                      ),
-                    ),
-                    if (chapter.totalTopicsCount != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${chapter.totalTopicsCount} Topics',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.textMutedOlive,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-                if (isOdia) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    chapter.titleOr,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textMutedOlive,
-                    ),
-                  ),
-                ],
-                if (chapter.lockReason != null) ...[
-                  const SizedBox(height: 6),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Icon(Icons.lock_clock_outlined,
-                          size: 12, color: AppColors.textMutedOlive),
-                      const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          chapter.lockReason!,
+                          chapter.titleEn,
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
                             color: AppColors.textMutedOlive,
                           ),
                         ),
                       ),
+                      if (chapter.totalTopicsCount != null)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${chapter.totalTopicsCount} Topics',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.textMutedOlive,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                ]
-              ],
+                  if (isOdia) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      chapter.titleOr,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.textMutedOlive,
+                      ),
+                    ),
+                  ],
+                  if (chapter.lockReason != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        const Icon(Icons.lock_clock_outlined,
+                            size: 12, color: AppColors.textMutedOlive),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            chapter.lockReason!,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMutedOlive,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ]
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

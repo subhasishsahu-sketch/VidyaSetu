@@ -37,6 +37,10 @@ class Explanation {
     required this.insight,
   });
 
+  /// Semantic alias getters for Odia and English breakdowns
+  String get breakdownOr => pureOdia;
+  String get breakdownEn => pureEnglish;
+
   factory Explanation.fromJson(Map<dynamic, dynamic> json) {
     final rawModes = json['modes'];
     final modes = rawModes is Map ? Map<String, dynamic>.from(rawModes) : <String, dynamic>{};

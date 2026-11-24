@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../core/config/app_config.dart';
 import '../core/offline/local_database.dart';
 import '../data/repositories/hybrid_vidyasetu_repository.dart';
 import 'repository_provider.dart';
@@ -41,6 +43,9 @@ class HealthNotifier extends StateNotifier<HealthState> {
 
   Future<void> checkHealth() async {
     final online = await _repo.isOnline();
+    debugPrint(
+      '[VidyaSetu Health] Mode: ${online ? "ONLINE -> Connected to FastAPI (${AppConfig.apiBaseUrl})" : "OFFLINE -> Local SQLite & Local SLM active"}',
+    );
     int queueCount = 0;
     try {
       queueCount = _localDb.getPendingQueueCount();

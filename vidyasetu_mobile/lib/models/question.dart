@@ -1,4 +1,5 @@
 import 'answer_option.dart';
+import '../data/models/question_model.dart';
 
 class Question {
   final String id;
@@ -46,6 +47,34 @@ class Question {
               .toList() ??
           [],
       correctOptionId: json['correct_option_id'] as String? ?? '',
+    );
+  }
+
+  /// Converts a backend/repository QuestionModel into an assessment UI Question.
+  factory Question.fromQuestionModel(
+    QuestionModel model, {
+    int stepNumber = 1,
+    int totalSteps = 1,
+  }) {
+    return Question(
+      id: model.questionId,
+      stepNumber: stepNumber,
+      totalSteps: totalSteps,
+      subject: model.subject,
+      topic: model.conceptName,
+      typeBadgeEn: model.subject,
+      typeBadgeOr: model.subject,
+      standard: 'BSE Odisha Standard',
+      questionTextEn: model.questionText,
+      questionTextOr: model.questionText,
+      options: model.options
+          .map((o) => AnswerOption(
+                id: o.key,
+                textEn: o.text,
+                textOr: o.text,
+              ))
+          .toList(),
+      correctOptionId: model.correctAnswer ?? '',
     );
   }
 

@@ -7,23 +7,162 @@ import '../../../shared_widgets/app_header.dart';
 import '../../../shared_widgets/bottom_nav_bar.dart';
 import '../../../state/locale_provider.dart';
 import '../../../state/diagnostic_session_provider.dart';
+import '../../../models/question.dart';
 import '../widgets/option_tile.dart';
 import '../widgets/why_engine_drawer.dart';
 
-class TestScreen extends ConsumerWidget {
-  const TestScreen({Key? key}) : super(key: key);
+class TestScreen extends ConsumerStatefulWidget {
+  final String? chapterId;
+  const TestScreen({Key? key, this.chapterId}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TestScreen> createState() => _TestScreenState();
+}
+
+class _TestScreenState extends ConsumerState<TestScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref
+          .read(diagnosticSessionProvider.notifier)
+          .loadSession(chapterId: widget.chapterId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final language = ref.watch(localeProvider);
     final isOdia = language == AppLanguage.odia;
     final sessionState = ref.watch(diagnosticSessionProvider);
     final question = sessionState.currentQuestion;
 
-    if (sessionState.isLoading || question == null) {
+    if (sessionState.isLoading) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(color: AppColors.primaryPaddyGreen),
+        ),
+      );
+    }
+
+    // Session Completed View (Celebratory Summary)
+    if (sessionState.isSessionCompleted || question == null) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF1F8EF),
+        body: SafeArea(
+          child: Column(
+            children: [
+              const AppHeader(showBackButton: true),
+              Expanded(
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(24),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: AppColors.cardBorderHairline),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 72,
+                            height: 72,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFD4EED8),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.emoji_events_rounded,
+                              size: 40,
+                              color: AppColors.primaryPaddyGreen,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            isOdia
+                                ? 'ଅଧ୍ୟାୟ ତନଖି ସମ୍ପୂର୍ଣ୍ଣ!'
+                                : 'Chapter Diagnostic Completed!',
+                            style: AppTypography.headlineSmall(),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            isOdia
+                                ? 'ଆପଣ ${sessionState.questions.length} ରୁ ${sessionState.correctAnswersCount} ଟି ପ୍ରଶ୍ନର ସଠିକ୍ ଉତ୍ତର ଦେଇଛନ୍ତି।'
+                                : 'You answered ${sessionState.correctAnswersCount} of ${sessionState.questions.length} questions correctly.',
+                            style: AppTypography.bodyMedium(
+                              color: AppColors.textMutedOlive,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Return to Roadmap Button
+                          ElevatedButton(
+                            onPressed: () {
+                              context.push('/roadmap');
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryPaddyGreen,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 32, vertical: 14),
+                              minimumSize: const Size(double.infinity, 48),
+                            ),
+                            child: Text(
+                              isOdia
+                                  ? 'ପାଠ୍ୟକ୍ରମ ରୋଡମ୍ୟାପ୍କୁ ଫେରନ୍ତୁ ➔'
+                                  : 'Back to Roadmap ➔',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Retake Chapter Button
+                          OutlinedButton(
+                            onPressed: () {
+                              ref
+                                  .read(diagnosticSessionProvider.notifier)
+                                  .restartSession();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(
+                                  color: AppColors.primaryPaddyGreen),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 32, vertical: 14),
+                              minimumSize: const Size(double.infinity, 48),
+                            ),
+                            child: Text(
+                              isOdia ? 'ପୁଣି ଅଭ୍ୟାସ କରନ୍ତୁ' : 'Retake Chapter',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryPaddyGreen,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const BottomNavBar(currentIndex: 2),
+            ],
+          ),
         ),
       );
     }
@@ -40,7 +179,7 @@ class TestScreen extends ConsumerWidget {
             const AppHeader(showBackButton: true),
 
             // Question Progress Bar & Topic Status
-            _buildStatusBar(question),
+            _buildStatusBar(question, sessionState),
 
             // Main Scrollable Test Content
             Expanded(
@@ -58,10 +197,8 @@ class TestScreen extends ConsumerWidget {
                     ...question.options.map((option) {
                       final isSelected =
                           sessionState.selectedOptionId == option.id;
-                      final isCorrect =
-                          option.id == question.correctOptionId;
-                      final isWrongSelection =
-                          isSelected && !isCorrect;
+                      final isCorrect = option.id == question.correctOptionId;
+                      final isWrongSelection = isSelected && !isCorrect;
 
                       return OptionTile(
                         option: option,
@@ -93,14 +230,92 @@ class TestScreen extends ConsumerWidget {
                                       .submitAnswer();
                                 }
                               : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryPaddyGreen,
+                            minimumSize: const Size(double.infinity, 48),
+                          ),
                           child: Text(
                             isOdia ? 'ଉତ୍ତର ଜମା କରନ୍ତୁ' : 'Submit Answer',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
 
-                    // WHY Engine Slide-up Diagnosis Card
+                    // Correct Answer Feedback Banner
                     if (sessionState.isSubmitted &&
+                        sessionState.isCorrect == true)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4EED8),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                              color: AppColors.primaryPaddyGreen, width: 1.5),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.check_circle,
+                                    color: AppColors.primaryPaddyGreen,
+                                    size: 24),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    isOdia
+                                        ? 'ସଠିକ୍ ଉତ୍ତର! (Correct Answer!)'
+                                        : 'Correct Answer! (ସଠିକ୍ ଉତ୍ତର!)',
+                                    style: AppTypography.titleMedium(
+                                      color: AppColors.primaryDarkGreen,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () {
+                                ref
+                                    .read(diagnosticSessionProvider.notifier)
+                                    .nextQuestion();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryPaddyGreen,
+                                minimumSize: const Size(double.infinity, 44),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    (sessionState.currentQuestionIndex ==
+                                            sessionState.questions.length - 1)
+                                        ? (isOdia
+                                            ? 'ଅଧ୍ୟାୟ ସମ୍ପୂର୍ଣ୍ଣ କରନ୍ତୁ ➔'
+                                            : 'Finish Chapter ➔')
+                                        : (isOdia
+                                            ? 'ପରବର୍ତ୍ତୀ ପ୍ରଶ୍ନ ➔'
+                                            : 'Next Question ➔'),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // WHY Engine Slide-up Diagnosis Card (Triggered on Wrong Answer)
+                    if (sessionState.isSubmitted &&
+                        sessionState.isCorrect == false &&
                         sessionState.whyResult != null) ...[
                       WhyEngineDrawer(
                         result: sessionState.whyResult!,
@@ -122,14 +337,24 @@ class TestScreen extends ConsumerWidget {
                               .submitProbeAnswer(probeOpt);
                         },
                         recoveryQuestion: sessionState.recoveryQuestion,
-                        selectedRecoveryOption: sessionState.selectedRecoveryOption,
+                        selectedRecoveryOption:
+                            sessionState.selectedRecoveryOption,
                         onSelectRecoveryOption: (recOpt) {
                           ref
                               .read(diagnosticSessionProvider.notifier)
                               .submitRecoveryAnswer(recOpt);
                         },
+                        recoveryResult: sessionState.recoveryResult,
+                        onNextQuestion: () {
+                          ref
+                              .read(diagnosticSessionProvider.notifier)
+                              .nextQuestion();
+                        },
                         isSubmittingProbe: sessionState.isSubmittingProbe,
-                        isSubmittingRecovery: sessionState.isSubmittingRecovery,
+                        isSubmittingRecovery:
+                            sessionState.isSubmittingRecovery,
+                        error: sessionState.error,
+                        probeResult: sessionState.probeResult,
                       ),
                     ],
                   ],
@@ -145,7 +370,10 @@ class TestScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBar(dynamic question) {
+  Widget _buildStatusBar(Question question, DiagnosticSessionState state) {
+    final stepNum = state.currentQuestionIndex + 1;
+    final totalSteps = state.questions.length;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: const Color(0xFFEAF5E7),
@@ -163,7 +391,7 @@ class TestScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Question ${question.stepNumber} of ${question.totalSteps}',
+                        'Question $stepNum of $totalSteps',
                         style: AppTypography.titleSmall(),
                       ),
                       Text(
@@ -203,14 +431,14 @@ class TestScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 10),
 
-          // 5-segment progress bar matching Screenshot 3
+          // Multi-segment progress bar
           Row(
-            children: List.generate(question.totalSteps, (index) {
+            children: List.generate(totalSteps, (index) {
               final step = index + 1;
               Color color;
-              if (step < question.stepNumber) {
+              if (step < stepNum) {
                 color = AppColors.primaryPaddyGreen; // Completed
-              } else if (step == question.stepNumber) {
+              } else if (step == stepNum) {
                 color = const Color(0xFFC75D2C); // Active question (orange)
               } else {
                 color = const Color(0xFFD6E8D2); // Upcoming
@@ -219,7 +447,7 @@ class TestScreen extends ConsumerWidget {
               return Expanded(
                 child: Container(
                   margin: EdgeInsets.only(
-                    right: index == question.totalSteps - 1 ? 0 : 4,
+                    right: index == totalSteps - 1 ? 0 : 4,
                   ),
                   height: 4,
                   decoration: BoxDecoration(
@@ -235,7 +463,7 @@ class TestScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuestionCard(dynamic question, bool isOdia) {
+  Widget _buildQuestionCard(Question question, bool isOdia) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceWhite,

@@ -181,6 +181,30 @@ class LocalDatabase {
     );
   }
 
+  /// Retrieves any previously saved student record, or null if database is empty.
+  StudentModel? getAnyStudent() {
+    try {
+      final rows = writableDb.select('SELECT * FROM students_local LIMIT 1;');
+      if (rows.isEmpty) return null;
+      final r = rows.first;
+      return StudentModel(
+        studentId: (r['student_id'] ?? '').toString(),
+        name: (r['name'] ?? '').toString(),
+        classGrade: (r['class_grade'] as num).toInt(),
+        preferredLanguage: (r['preferred_language'] ?? 'Odia').toString(),
+        englishExposureLevel: (r['english_exposure_level'] as num).toInt(),
+        subject: (r['subject'] ?? '').toString(),
+        completedChapters: ((r['completed_chapters'] as num?) ?? 0).toInt(),
+        recommendedNextTask: r['recommended_next_task'] != null
+            ? jsonDecode(r['recommended_next_task'].toString()) as Map<String, dynamic>
+            : null,
+        createdAt: DateTime.parse(r['created_at'].toString()),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   // --- Progress operations ---
 
   void upsertProgress(ProgressModel progress) {

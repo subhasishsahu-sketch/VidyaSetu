@@ -1,0 +1,49 @@
+{
+  "HIST_CH2_Q03": {
+    "question_id": "HIST_CH2_Q03",
+    "title": "State Planning Board vs Plan...",
+    "sub_header": "CONCEPT REPAIR • QUESTION 3 BREAKDOWN",
+    "mistake_tag": "Mistake Detected: Central vs State jurisdiction confusion",
+    "subject_tag": "Class 10 Polity",
+    "modes": {
+      "bilingual_mix": "Planning Commission (ଯୋଜନା ଆୟୋଗ) ର ମୁଖ୍ୟ କାମ ଥିଲା India ପାଇଁ Five Year Plans (ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା) ପ୍ରସ୍ତୁତ କରିବା। Odisha ରେ Green Revolution (ସବୁଜ ବିପ୍ଳବ) ଏବଂ Major Industries ଯେପରି Rourkela Steel Plant ପ୍ରତିଷ୍ଠା ପାଇଁ Mixed Economy model follow କରାଯାଉଥିଲା। ରାଜ୍ୟ ସ୍ତରରେ ସମ୍ବଳ ବଣ୍ଟନ ଓ ଯୋଜନା ପ୍ରସ୍ତୁତି State Planning Board ଦ୍ୱାରା ହୋଇଥିଲା।",
+      "pure_odia": "କେନ୍ଦ୍ର ସ୍ତରରେ ଯୋଜନା ଆୟୋଗର ମୁଖ୍ୟ କାର୍ଯ୍ୟ ଥିଲା ସମଗ୍ର ଭାରତ ପାଇଁ ପଞ୍ଚବାର୍ଷିକ ଯୋଜନା ପ୍ରଣୟନ କରିବା। ଏହାଦ୍ୱାରା ଓଡ଼ିଶାରେ ରାଉରକେଲା ଇସ୍ପାତ କାରଖାନା ଭଳି ବୃହତ ଶିଳ୍ପ ଓ ସବୁଜ ବିପ୍ଳବ କାର୍ଯ୍ୟକାରୀ ହୋଇଥିଲା। ଅନ୍ୟପକ୍ଷରେ, ରାଜ୍ୟ ସ୍ତରରେ ବିକାଶ ଓ ସମ୍ବଳର ଉପଯୁକ୍ତ ବଣ୍ଟନ ପାଇଁ ରାଜ୍ୟ ଯୋଜନା ବୋର୍ଡ ଦାୟୀ ଥିଲା।",
+      "pure_english": "The primary function of the Planning Commission was to formulate Five Year Plans at the National level for India. It guided major initiatives such as the Green Revolution and large-scale industrial projects like the Rourkela Steel Plant in Odisha. At the sub-national level, allocation of local resources and decentralized state policies were spearheaded by the State Planning Board."
+    },
+    "comparison_cards": [
+      {
+        "title": "Planning Commission",
+        "scope": "Central Level (National Scope • ଦେଶ ସ୍ତରୀୟ)",
+        "color_type": "primary"
+      },
+      {
+        "title": "State Planning Board",
+        "scope": "Odisha State Level (ରାଜ୍ୟ ସ୍ତରୀୟ ସମ୍ବଳ ବଣ୍ଟନ)",
+        "color_type": "terracotta"
+      }
+    ],
+    "grounded_citation": {
+      "book_title": "BSE Odisha Class 10 History & Political Science",
+      "chapter_no": 2,
+      "page_no": 58,
+      "paragraph_no": 3,
+      "code": "BSE-OD-C10-H2",
+      "status": "Verified Syllabus Context",
+      "subtext": "Retrieved from Offline SQLite / ChromaDB Embeddings • Zero Data Used"
+    },
+    "historical_reference": {
+      "location": "Rourkela, Odisha Case Study",
+      "description": "Established under India's 2nd Five Year Plan for rapid industrial growth...",
+      "archive_label": "Historic Reference Archive"
+    },
+    "audio": {
+      "title": "Listen in Odia Voice (ଓଡ଼ିଆରେ ଶୁଣନ୍ତୁ)",
+      "badge": "Offline Edge TTS",
+      "current_time": "01:24",
+      "total_time": "02:40",
+      "current_seconds": 84,
+      "total_seconds": 160
+    },
+    "insight": "Great insight! Remembering that Central plans the nation while States implement regional priorities will help you in Question 5 too."
+  }
+}

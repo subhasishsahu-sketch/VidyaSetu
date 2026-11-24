@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'question_model.dart';
+export 'question_model.dart';
 
 /// Categorical 7-parameter behavioral snapshot.
 @immutable
@@ -352,6 +353,18 @@ class InterventionOutput {
           ((json['recorded_english_exposure_level'] as num?) ?? 1).toInt(),
     );
   }
+
+  /// Computed getters for backward-compatible and ergonomic UI presentation
+  String get bilingualExplanation => bilingualExplanationOdiaEnglish;
+
+  String get textbookCitation =>
+      '${groundedTextbookReference.textbookName} Ch ${groundedTextbookReference.chapterNo}${groundedTextbookReference.pageNo != null ? " Pg. ${groundedTextbookReference.pageNo}" : ""}';
+
+  List<String> get groundedGlossary => englishTermsWithOdiaMeanings
+      .map((t) => t.odiaMeaning.isNotEmpty
+          ? '${t.englishTerm} (${t.odiaMeaning})'
+          : t.englishTerm)
+      .toList();
 }
 
 /// Result returned after evaluating probe response.
@@ -477,4 +490,14 @@ class RecoverySubmitResponse {
       recommendedNextTask: task,
     );
   }
+
+  /// Computed getters for UI presentation
+  double get masteryImpact =>
+      updatedScores['overall_mastery'] ??
+      updatedScores['concept_understanding'] ??
+      15.0;
+
+  String? get explanation =>
+      recommendedNextTask['task_title']?.toString() ??
+      recommendedNextTask['description']?.toString();
 }

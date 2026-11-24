@@ -10,6 +10,7 @@ import '../models/diagnostic_model.dart';
 import '../models/language_model.dart';
 import '../models/offline_pack_model.dart';
 import '../models/sync_batch_model.dart';
+import '../models/voice_model.dart';
 import '../../core/config/app_config.dart';
 import 'vidyasetu_repository.dart';
 
@@ -209,6 +210,56 @@ class CloudVidyaSetuRepository implements VidyaSetuRepository {
 
     _assertSuccess(res, 'Offline sync failed');
     return OfflineSyncBatchResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
+  @override
+  Future<TtsResponse> synthesizeSpeech(TtsRequest request) async {
+    final uri = Uri.parse('$_baseUrl/voice/tts');
+    final res = await _client
+        .post(uri, headers: _headers, body: jsonEncode(request.toJson()))
+        .timeout(AppConfig.requestTimeout);
+
+    _assertSuccess(res, 'Voice synthesis failed');
+    return TtsResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
+  @override
+  Future<List<int>> synthesizeSpeechAudio(TtsRequest request) async {
+    final uri = Uri.parse('$_baseUrl/voice/tts/audio');
+    final res = await _client
+        .post(uri, headers: _headers, body: jsonEncode(request.toJson()))
+        .timeout(AppConfig.requestTimeout);
+
+    _assertSuccess(res, 'Audio synthesis failed');
+    return res.bodyBytes;
+  }
+
+  @override
+  Future<SttResponse> transcribeAudio({
+    required List<int> audioBytes,
+    required String filename,
+    String languageCode = 'od-IN',
+    String mode = 'codemix',
+    String? keytermsCsv,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/voice/stt');
+    final request = http.MultipartRequest('POST', uri);
+    request.fields['language_code'] = languageCode;
+    request.fields['mode'] = mode;
+    if (keytermsCsv != null) {
+      request.fields['keyterms_csv'] = keytermsCsv;
+    }
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      audioBytes,
+      filename: filename,
+    ));
+
+    final streamedResponse =
+        await _client.send(request).timeout(const Duration(seconds: 30));
+    final res = await http.Response.fromStream(streamedResponse);
+    _assertSuccess(res, 'Voice transcription failed');
+    return SttResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
   void _assertSuccess(http.Response res, String message) {

@@ -5,6 +5,7 @@ import '../../data/models/diagnostic_model.dart';
 import '../../data/models/language_model.dart';
 import '../../data/models/offline_pack_model.dart';
 import '../../data/models/sync_batch_model.dart';
+import '../../data/models/voice_model.dart';
 
 /// Unified repository interface for VidyaSetu client SDK.
 /// UI screens and feature blocs interact exclusively with this contract.
@@ -57,4 +58,19 @@ abstract class VidyaSetuRepository {
 
   /// Synchronizes queued offline events to the cloud.
   Future<OfflineSyncBatchResponse> syncPendingOfflineEvents({String? studentId});
+
+  /// Synthesizes speech from text via Sarvam AI TTS (Base64 JSON).
+  Future<TtsResponse> synthesizeSpeech(TtsRequest request);
+
+  /// Synthesizes speech from text and returns raw binary audio bytes.
+  Future<List<int>> synthesizeSpeechAudio(TtsRequest request);
+
+  /// Transcribes audio payload into text using Sarvam AI STT.
+  Future<SttResponse> transcribeAudio({
+    required List<int> audioBytes,
+    required String filename,
+    String languageCode = 'od-IN',
+    String mode = 'codemix',
+    String? keytermsCsv,
+  });
 }
